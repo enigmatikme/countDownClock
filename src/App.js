@@ -10,7 +10,8 @@ class App extends Component {
     this.state ={
       hours: 0, 
       minutes: 0,
-      seconds: 0
+      seconds: 0,
+      isOn: false
     }
     // eslint-disable-next-line no-unused-expressions
     this.secondsRemaining;
@@ -26,61 +27,49 @@ class App extends Component {
   }
   
   startCountdown() {
-    var hr = Math.floor(this.secondsRemaining/3600);
-    var mins = Math.floor((this.secondsRemaining - (hr * 3600))/60); //7322 - 7200 = 122 /60 = 2
-    var sec = Math.floor(this.secondsRemaining % 3600 % 60);
-    
-    this.setState({
-      hours: hr, 
-      minutes: mins,
-      seconds: sec
-    });
-    
-    if (hr < 10) {
+    if (this.state.isOn) {
+      var hr = Math.floor(this.secondsRemaining/3600);
+      var mins = Math.floor((this.secondsRemaining - (hr * 3600))/60); //7322 - 7200 = 122 /60 = 2
+      var sec = Math.floor(this.secondsRemaining % 3600 % 60);
+      
       this.setState({
-        hours: "0" + hr
+        hours: hr, 
+        minutes: mins,
+        seconds: sec
       });
+  
+      if (hr === 0 && mins === 0 && sec === 0 ) {
+        clearInterval(this.intervalHandle);
+      }
+  
+      this.secondsRemaining--
     }
-
-    if (mins < 10) {
-      this.setState({
-        minutes: "0" + mins
-      });
-    }
-    
-    if (sec < 10) {
-      this.setState({
-        seconds: "0" + sec
-      });
-    }
-
-    if (hr === 0 && mins === 0 && sec === 0 ) {
-      clearInterval(this.intervalHandle);
-    }
-
-    this.secondsRemaining--
   }
 
   handleCountDown() {
-    const {hours, minutes, seconds} = this.state
-    this.intervalHandle = setInterval(this.startCountdown, 1000);
+    const {hours, minutes, seconds, isOn} = this.state
+    if (!isOn) {
+      this.setState({isOn: true})
+      this.intervalHandle = setInterval(this.startCountdown, 1000);
+    }
     let time = (hours * 3600) + (minutes * 60) + parseInt(seconds)
-  
     this.secondsRemaining = time;
   }
   
 
   handlePauseClick() {
+    this.setState({isOn: false})
     clearInterval(this.intervalHandle);
   }
 
   handleResetClick() {
-    clearInterval(this.intervalHandle);
     this.setState({
       hours: 0, 
       minutes: 0, 
-      seconds: 0
+      seconds: 0, 
+      isOn: false
     });
+    clearInterval(this.intervalHandle);
   }
 
   handleHoursChange(event) {
